@@ -17,8 +17,10 @@ package com.example.android.quakereport;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,8 +32,11 @@ import com.example.android.quakereport.to.Earthquake;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
+
+    private String URL =  "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
@@ -40,9 +45,21 @@ public class EarthquakeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
-        // Create a fake list of earthquakes.
-        final ArrayList<Earthquake> earthquakes = QueryUtils.extractEarthquakes();
+        Log.i(LOG_TAG, "Executing onCreate");
 
+        Log.i(LOG_TAG, "Invoking AsyncTask");
+
+        new EarthquakeAsyncTask().execute(URL);
+
+
+    }
+
+
+    /**
+     * update the adapters
+     * @param earthquakes
+     */
+    private void updateUI(final List<Earthquake> earthquakes) {
         EarthquakeAdapter adapter = new EarthquakeAdapter(this,0,earthquakes);
 
 
@@ -60,10 +77,35 @@ public class EarthquakeActivity extends AppCompatActivity {
             }
         });
 
-
-
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(adapter);
     }
+
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void,List<Earthquake>> {
+
+        @Override
+        protected List<Earthquake> doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+
+            List<Earthquake> earthquakeList = QueryUtils.fetchEarthquakeData(urls[0]);
+
+            return earthquakeList;
+        }
+
+        protected void onPostExecute(List<Earthquake> earthquakes) {
+            if (earthquakes == null) {
+                return;
+            }
+
+            // Update the information displayed to the user.
+            updateUI(earthquakes);
+        }
+
+    }
+
+
+
 }
