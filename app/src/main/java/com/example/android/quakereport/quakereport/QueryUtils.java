@@ -2,6 +2,7 @@ package com.example.android.quakereport.quakereport;
 
 import android.util.Log;
 
+import com.example.android.quakereport.loader.EarthquakeLoadAsyncTask;
 import com.example.android.quakereport.to.Earthquake;
 
 import org.json.JSONArray;
@@ -27,7 +28,7 @@ import static com.example.android.quakereport.EarthquakeActivity.LOG_TAG;
  */
 public final class QueryUtils {
 
-
+    public static final String LOG_TAG = QueryUtils.class.getName();
 
 
     /**
@@ -45,6 +46,7 @@ public final class QueryUtils {
      * @return
      */
     public static List<Earthquake> fetchEarthquakeData(String requestUrl) {
+        Log.i(LOG_TAG, "fetchEarthquakeData");
         // Create URL object
         URL url = createUrl(requestUrl);
 
